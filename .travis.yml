@@ -1,0 +1,12 @@
+sudo: required
+
+language: go
+
+services:
+  - docker
+
+before_install: docker build -t meomap:logruswindows .
+
+install: docker run --rm -w /go/src/github.com/meomap/logruswindows meomap:logruswindows go build -v
+
+script: go version
