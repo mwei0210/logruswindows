@@ -49,4 +49,11 @@ func TestEventHook(t *testing.T) {
 
 	fields["event_id"] = 432
 	logger.WithFields(fields).Error(msg)
+
+	_, err = NewEventHook(src, []logrus.Level{
+		logrus.ErrorLevel,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 }
