@@ -4,6 +4,7 @@ package logruswindows
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
@@ -17,11 +18,22 @@ type EventHook struct {
 	levels []logrus.Level
 }
 
+// isErrRegistryKeyExist checks if the error is registry key already
+// exists.
+// https://github.com/golang/sys/blob/30de6d19a3bd89a5f38ae4028e23aaa5582648af/windows/svc/eventlog/install.go#L44
+func isErrRegistryKeyExist(err error) bool {
+	const errMsg = " registry key already exists"
+	if err == nil {
+		return false
+	}
+	return strings.HasSuffix(err.Error(), errMsg)
+}
+
 // NewEventHook creates an event logging hook from even source
 // and supported log levels
 func NewEventHook(source string, levels []logrus.Level) (*EventHook, error) {
 	const supports = eventlog.Error | eventlog.Warning | eventlog.Info
-	if err := eventlog.InstallAsEventCreate(source, supports); err != nil {
+	if err := eventlog.InstallAsEventCreate(source, supports); err != nil && !isErrRegistryKeyExist(err) {
 		return nil, errors.Wrapf(err, "eventlog.InstallAsEventCreate source=%s", source)
 	}
 
