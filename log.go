@@ -38,7 +38,7 @@ func formatEntry(entry *logrus.Entry) (string, error) {
 	}
 	serialized, err := formatter.Format(entry)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "formatter.Format")
 	}
 	return string(serialized), nil
 }
@@ -66,7 +66,7 @@ func NewEventHook(source string, levels []logrus.Level) (*EventHook, error) {
 func (hook *EventHook) Fire(entry *logrus.Entry) error {
 	msg, err := formatEntry(entry)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "formatEntry")
 	}
 	var eventID uint32 = 1
 	id, ok := entry.Data["event_id"].(string)
