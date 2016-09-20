@@ -29,6 +29,20 @@ func isErrRegistryKeyExist(err error) bool {
 	return strings.HasSuffix(err.Error(), errMsg)
 }
 
+// formatEntry formats the logrus entry to a message without redundant
+// information (timestamp, log level) to send to windows log.
+func formatEntry(entry *logrus.Entry) (string, error) {
+	formatter := &logrus.TextFormatter{
+		DisableColors: true,
+		DisableTimestamp: true,
+	}
+	serialized, err := formatter.Format(entry)
+	if err != nil {
+		return "", err
+	}
+	return string(serialized), nil
+}
+
 // NewEventHook creates an event logging hook from even source
 // and supported log levels
 func NewEventHook(source string, levels []logrus.Level) (*EventHook, error) {
@@ -50,7 +64,10 @@ func NewEventHook(source string, levels []logrus.Level) (*EventHook, error) {
 
 // Fire extracts logrus entry and sends to window event log
 func (hook *EventHook) Fire(entry *logrus.Entry) error {
-	msg, err := entry.String()
+	msg, err := formatEntry(entry)
+	if err != nil {
+		return err
+	}
 	var eventID uint32 = 1
 	id, ok := entry.Data["event_id"].(string)
 	if ok {
