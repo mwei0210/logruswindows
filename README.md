@@ -6,7 +6,7 @@
 ```go
 import (
   "github.com/meomap/logruswindows"
-  "github.com/Sirupsen/logrus"
+  "github.com/sirupsen/logrus"
 )
 
 func main() {
